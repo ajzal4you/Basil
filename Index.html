@@ -1,40 +1,201 @@
-<!DOCTYPE html>
+import { useState, useEffect, useRef } from “react”;
 
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>You Won a Prize! 🎉</title>
-  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Fredoka+One&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+const COLORS = [”#ff2b2b”, “#ffe600”, “#1a1aff”, “#00d46a”, “#ff8c00”, “#ff55cc”];
 
-
-:root {
-  --red: #ff2b2b;
-  --yellow: #ffe600;
-  --blue: #1a1aff;
-  --green: #00d46a;
-  --white: #fffdf4;
-  --black: #111;
+function Dot({ style }) {
+return <div style={style} />;
 }
 
-body {
-  background: var(--yellow);
-  font-family: 'Fredoka One', cursive;
-  color: var(--black);
-  min-height: 100vh;
-  overflow-x: hidden;
-  cursor: none;
+function generateDots(count = 55) {
+return Array.from({ length: count }, (_, i) => {
+const size = Math.random() * 18 + 7;
+return {
+id: i,
+style: {
+position: “fixed”,
+width: size,
+height: size,
+left: ⁠ ${Math.random() * 100}vw ⁠,
+top: -60,
+background: COLORS[Math.floor(Math.random() * COLORS.length)],
+borderRadius: Math.random() > 0.5 ? “50%” : 4,
+opacity: 0.85,
+animation: ⁠ fall ${Math.random() * 4 + 3}s ${Math.random() * 5}s linear infinite ⁠,
+pointerEvents: “none”,
+zIndex: 0,
+},
+};
+});
 }
 
-/* Custom cursor */
-.cursor {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--red);
-  position: fixed;
-  pointer-events: none;
+export default function AprilFools() {
+const [revealed, setRevealed] = useState(false);
+const [seconds, setSeconds] = useState(4 * 60 + 59);
+const [dots] = useState(generateDots);
+const [burstDots, setBurstDots] = useState([]);
+const intervalRef = useRef(null);
+
+useEffect(() => {
+intervalRef.current = setInterval(() => {
+setSeconds((s) => {
+if (s <= 1) { clearInterval(intervalRef.current); return 0; }
+return s - 1;
+});
+}, 1000);
+return () => clearInterval(intervalRef.current);
+}, []);
+
+const formatTime = (s) => {
+const m = String(Math.floor(s / 60)).padStart(2, “0”);
+const sec = String(s % 60).padStart(2, “0”);
+return ⁠ ${m}:${sec} ⁠;
+};
+
+const handleClaim = () => {
+clearInterval(intervalRef.current);
+setRevealed(true);
+const burst = Array.from({ length: 35 }, (_, i) => ({
+id: ⁠ burst-${i}-${Date.now()} ⁠,
+style: {
+position: “fixed”,
+width: Math.random() * 16 + 8,
+height: Math.random() * 16 + 8,
+left: ⁠ ${Math.random() * 100}vw ⁠,
+top: -20,
+background: COLORS[Math.floor(Math.random() * COLORS.length)],
+borderRadius: Math.random() > 0.5 ? “50%” : 4,
+animation: ⁠ fall ${Math.random() * 2 + 1.5}s 0s linear forwards ⁠,
+pointerEvents: “none”,
+zIndex: 0,
+},
+}));
+setBurstDots(burst);
+setTimeout(() => setBurstDots([]), 3500);
+};
+
+return (
+<>
+<style>{⁠ @import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Fredoka+One&display=swap'); * { box-sizing: border-box; margin: 0; padding: 0; } body { background: #ffe600; } @keyframes fall { 0%   { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } } @keyframes popIn { from { opacity: 0; transform: scale(0.4) rotate(-6deg); } to   { opacity: 1; transform: scale(1) rotate(0deg); } } @keyframes spin { from { transform: rotate(-10deg) scale(1); } to   { transform: rotate(10deg) scale(1.12); } } @keyframes pulse { from { transform: scale(1); } to   { transform: scale(1.07); } } @keyframes growBar { 0%   { width: 0%; } 60%  { width: 85%; } 80%  { width: 92%; } 100% { width: 97%; } } .card { animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both; } .emoji { animation: spin 2s ease-in-out infinite alternate; display:block; } .badge1 { animation: pulse 1.5s ease-in-out infinite alternate; } .badge2 { animation: pulse 1.5s ease-in-out 0.3s infinite alternate; } .badge3 { animation: pulse 1.5s ease-in-out 0.6s infinite alternate; } .bar    { animation: growBar 2.4s cubic-bezier(0.4,0,0.2,1) forwards; } .reveal { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; } .btn:hover { transform: translate(-2px,-2px); box-shadow: 8px 8px 0 #111; } .btn:active { transform: translate(3px,3px); box-shadow: 3px 3px 0 #111; } ⁠}</style>
+
+
+  {/* Confetti */}
+  {[...dots, ...burstDots].map((d) => <Dot key={d.id} style={d.style} />)}
+
+  <div style={{
+    fontFamily: "'Fredoka One', cursive",
+    background: "#ffe600",
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "40px 20px",
+    textAlign: "center",
+    position: "relative",
+    zIndex: 1,
+  }}>
+    <div className="card" style={{
+      background: "#fffdf4",
+      border: "5px solid #111",
+      borderRadius: 28,
+      padding: "48px 40px 40px",
+      maxWidth: 520,
+      width: "100%",
+      boxShadow: "10px 10px 0 #111",
+    }}>
+      <span className="emoji" style={{ fontSize: 80, marginBottom: 12 }}>🎁</span>
+
+      <h1 style={{
+        fontSize: "clamp(1.8rem, 6vw, 3rem)",
+        lineHeight: 1.1,
+        color: "#ff2b2b",
+        textShadow: "3px 3px 0 #111",
+        marginBottom: 12,
+      }}>
+        YOU'RE OUR<br />1,000,000th VISITOR!
+      </h1>
+
+      <p style={{ fontFamily: "'Boogaloo', cursive", fontSize: "1.2rem", color: "#444", marginBottom: 24 }}>
+        Congratulations! You've been randomly selected<br />to claim your <strong>exclusive prize</strong> right now.
+      </p>
+
+      {/* Badges */}
+      <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 24 }}>
+        {[
+          { label: "✅ Verified Winner", bg: "#1a1aff", color: "#fff", cls: "badge1" },
+          { label: "🔥 Limited Time",   bg: "#ff2b2b", color: "#fff", cls: "badge2" },
+          { label: "🎯 Only You!",      bg: "#00d46a", color: "#111", cls: "badge3" },
+        ].map(b => (
+          <span key={b.label} className={b.cls} style={{
+            background: b.bg, color: b.color,
+            fontFamily: "'Boogaloo', cursive", fontSize: "0.9rem",
+            padding: "6px 16px", borderRadius: 999, border: "3px solid #111",
+          }}>{b.label}</span>
+        ))}
+      </div>
+
+      {/* Timer */}
+      <p style={{ fontFamily: "'Boogaloo', cursive", fontSize: "0.95rem", color: "#555", marginBottom: 8, textAlign: "left" }}>
+        Securing your prize…{" "}
+        {revealed
+          ? <span>😂</span>
+          : <span>expires in <strong style={{ color: "#ff2b2b" }}>{formatTime(seconds)}</strong></span>
+        }
+      </p>
+
+      {/* Progress bar */}
+      <div style={{
+        background: "#eee", border: "3px solid #111",
+        borderRadius: 999, height: 28, overflow: "hidden", marginBottom: 8,
+      }}>
+        <div className="bar" style={{
+          height: "100%", borderRadius: 999,
+          background: "repeating-linear-gradient(-45deg,#00d46a 0px,#00d46a 14px,#00b859 14px,#00b859 28px)",
+        }} />
+      </div>
+      <p style={{ fontFamily: "'Boogaloo', cursive", fontSize: "0.88rem", color: "#555", marginBottom: 24, textAlign: "left" }}>
+        Loading your reward: 97% complete…
+      </p>
+
+      {/* Button */}
+      {!revealed && (
+        <button className="btn" onClick={handleClaim} style={{
+          background: "#ff2b2b", color: "#fffdf4",
+          fontFamily: "'Fredoka One', cursive", fontSize: "1.35rem",
+          padding: "16px 40px", border: "4px solid #111",
+          borderRadius: 14, boxShadow: "6px 6px 0 #111",
+          cursor: "pointer", transition: "transform 0.1s, box-shadow 0.1s",
+        }}>
+          🎉 CLAIM MY PRIZE NOW
+        </button>
+      )}
+
+      {/* Reveal */}
+      {revealed && (
+        <div className="reveal" style={{
+          background: "#ffe600", border: "4px solid #111",
+          borderRadius: 20, padding: "28px 24px", boxShadow: "6px 6px 0 #111",
+        }}>
+          <h2 style={{ fontFamily: "'Fredoka One', cursive", fontSize: "2rem", color: "#111", marginBottom: 8 }}>
+            😂 April Fools!
+          </h2>
+          <p style={{ fontFamily: "'Boogaloo', cursive", fontSize: "1.15rem", color: "#333" }}>
+            There's no prize… just us goofing around.<br />
+            Happy April 1st — hope we got you! 🎈
+          </p>
+        </div>
+      )}
+    </div>
+
+    <p style={{ fontFamily: "'Boogaloo', cursive", fontSize: "0.85rem", color: "#888", marginTop: 24 }}>
+      totally-real-prizes.com &nbsp;·&nbsp; Not a scam (it is) &nbsp;·&nbsp; Happy April Fools!
+    </p>
+  </div>
+</>
+
+
+);
+}  pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
   transition: transform 0.08s ease, background 0.2s;
